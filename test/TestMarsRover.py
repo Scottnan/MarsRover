@@ -1,37 +1,48 @@
 from main.MarsRover import MarsRover
-from main.MarArea import MarsArea
+from main.basic import mars_area, BasicInfo
 import unittest
 
 
 class TestMarsRover(unittest.TestCase):
     def test_init(self):
-        area = MarsArea(X=100, Y=100)
-        mars_obj = MarsRover(x=30, y=20, theta=0)
-        self.assertEqual(mars_obj.get_location(), (30, 20))
-        self.assertEqual(mars_obj.get_orientation(), 0)
-        self.assertEqual(area.get_explore_area(), (100, 100))
+        info_obj = BasicInfo(2, 2, 'W')
+        command = "-l -l -f 10"
+        mars_obj = MarsRover(info_obj, command)
+        self.assertEqual((2, 2), mars_obj._get_location(), )
+        self.assertEqual(270, mars_obj._get_orientation())
 
-    # 判断方向是否合法： 0 - 360
-    def test_legal_orientation(self):
-        mars_obj = MarsRover(x=30, y=20, theta=720)
-        self.assertEqual(mars_obj.orient_is_legal(), False)
-        self.assertEqual(mars_obj.get_orientation(), 0)
-
-    # 探索：改变方向
     def test_turn_direction(self):
-        mars_obj = MarsRover(x=30, y=20, theta=0)
-        mars_obj.turnDirection("l")
-        self.assertEqual(mars_obj.get_orientation(), 90)
-        mars_obj.turnDirection("r")
-        self.assertEqual(mars_obj.get_orientation(), 0)
-        mars_obj.turnDirection("r")
-        self.assertEqual(mars_obj.get_orientation(), 270)
-        mars_obj = MarsRover(x=30, y=20, theta=270)
-        mars_obj.turnDirection("l")
-        self.assertEqual(mars_obj.get_orientation(), 0)
+        info_obj = BasicInfo(2, 2, 'N')
+        command = "-l -l -f 10"
+        mars_obj = MarsRover(info_obj, command)
+        mars_obj._turn_direction("l")
+        self.assertEqual(mars_obj._get_orientation(), 90)
+        mars_obj._turn_direction("r")
+        self.assertEqual(mars_obj._get_orientation(), 0)
+        mars_obj._turn_direction("r")
+        self.assertEqual(mars_obj._get_orientation(), 270)
+        mars_obj._turn_direction("r")
+        self.assertEqual(mars_obj._get_orientation(), 180)
+        mars_obj._turn_direction("l")
+        self.assertEqual(mars_obj._get_orientation(), 270)
 
-    # 探索： 行动
     def test_run(self):
-        mars_obj = MarsRover(x=30, y=20, theta=0)
-        mars_obj.Run(30)
-        self.assertEqual(mars_obj.get_location(), (60.0, 20.0))
+        info_obj = BasicInfo(2, 2, 'N')
+        command = "-l -l -f 10"
+        mars_obj = MarsRover(info_obj, command)
+        mars_obj.run(mars_area, 4)
+        self.assertEqual(mars_obj._get_location(), (2, 6))
+        mars_obj.run(mars_area, -7)
+        self.assertEqual(mars_obj._get_location(), (2, 9))
+        info_obj = BasicInfo(2, 2, 'N')
+        command = "-l -l -f 10"
+        mars_obj = MarsRover(info_obj, command)
+        mars_obj.run(mars_area, 8)
+        self.assertEqual(mars_obj._get_location(), (2, 7))
+
+
+class TestMarsArea(unittest.TestCase):
+    def test_is_obstacle(self):
+        self.assertEqual(False, mars_area.is_obstacle(1, 2))
+        self.assertEqual(False, mars_area.is_obstacle(7, 6))
+        self.assertEqual(True, mars_area.is_obstacle(10, 10))
